@@ -63,19 +63,29 @@ def multi_parameter_controller(parent, app):
             raise PreventUpdate
         data = {}
         colors = {}
+        priors = {}
         for ensemble_id, color in selected_ensembles.items():
             if parameter in parent.parameter_models[ensemble_id]:
-                data[parent.ensembles[ensemble_id]._name] = parent.parameter_models[
+                parameter_model = parent.parameter_models[
                     ensemble_id
-                ][parameter].data_df()
+                ][parameter]
+                data[parent.ensembles[ensemble_id]._name] = parameter_model.data_df()
                 colors[parent.ensembles[ensemble_id]._name] = color["color"]
+
+                if parameter_model.priors:
+                    priors[parent.ensembles[ensemble_id]._name] = parameter_model.priors
+                    print( parameter_model.priors.function)
+                    print( parameter_model.priors.function_parameter_names)
+                    print( parameter_model.priors.function_parameter_values)
 
         parent.parameter_plot = MultiHistogramPlotModel(
             data,
             colors=colors,
             hist="hist" in hist_check_values,
             kde="kde" in hist_check_values,
+            priors=priors
         )
+
         return parent.parameter_plot.repr
 
     @app.callback(
@@ -107,3 +117,31 @@ def multi_parameter_controller(parent, app):
         else:
             raise PreventUpdate
         return parameter
+
+    @app.callback(
+        Output(parent.uuid("hist-check"), "options"),
+        [
+            Input(parent.uuid("parameter-selector"), "value"),
+        ],
+        [
+            State(parent.uuid("hist-check"), "options"),
+            State(parent.uuid("ensemble-selection-store"), "data")
+        ],
+        
+    )
+    def _set_parameter_from_btn(parameter, plotting_options, selected_ensembles):
+        has_priors = False
+        for ensemble_id, color in selected_ensembles.items():
+            if parameter in parent.parameter_models[ensemble_id]:
+                parameter_model = parent.parameter_models[
+                    ensemble_id
+                ][parameter]
+                if parameter_model.priors:
+                    has_priors = True
+                    break
+        prior_option = {"label": "prior", "value": "prior"}
+        if has_priors and prior_option not in plotting_options:
+            plotting_options.append(prior_option)
+        if not has_priors and prior_option in plotting_options:
+            plotting_options.remove(prior_option)
+        return plotting_options

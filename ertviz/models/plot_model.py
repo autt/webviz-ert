@@ -1,7 +1,7 @@
 import math
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
-
+from scipy.stats import uniform, norm, lognorm
 
 class BoxPlotModel:
     def __init__(self, **kwargs):
@@ -107,13 +107,28 @@ class ResponsePlotModel:
         return {idx: rel.name for idx, rel in enumerate(self._realization_plots)}
 
 
+PRIOR_FUNCTIONS = {
+    "NORMAL" : norm,
+    "UNIFORM" : uniform
+}
+
+def _create_prior_plot(prior, _min, _max):
+    diff = (_max-_min)/100
+    xaxis = [_min + i * diff for i in range(100)]
+
+    yaxis = PRIOR_FUNCTIONS[prior.function].pdf(xaxis, *prior.function_parameter_values)
+    return go.Scatter(x=xaxis, y=yaxis)
+
+
+
 class MultiHistogramPlotModel:
-    def __init__(self, data_df_dict, colors, hist=True, kde=True):
+    def __init__(self, data_df_dict, colors, hist=True, kde=True, priors={}):
         self._hist_enabled = hist
         self._kde_enabled = kde
         self._data_df_dict = data_df_dict
         self.selection = []
         self._colors = colors
+        self._priors = priors
 
     @property
     def data_df(self):
@@ -152,8 +167,10 @@ class MultiHistogramPlotModel:
             colors=colors,
         )
         fig.update_layout(clickmode="event+select")
-
         fig.update_layout(uirevision=True)
+
+        for name, prior in self._priors.items():
+            fig.add_trace(_create_prior_plot(prior, _min, _max))
         return fig
 
 

@@ -1,4 +1,11 @@
 from ertviz.data_loader import get_schema, get_csv_data
+from scipy.stats import uniform
+
+def UNIFORM(x, min_x, max_x):
+    if min_x <= x <= max_x:
+        return 1
+    return 0
+
 
 
 class PriorModel:
