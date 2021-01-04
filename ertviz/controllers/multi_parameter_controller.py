@@ -66,24 +66,22 @@ def multi_parameter_controller(parent, app):
         priors = {}
         for ensemble_id, color in selected_ensembles.items():
             if parameter in parent.parameter_models[ensemble_id]:
-                parameter_model = parent.parameter_models[
-                    ensemble_id
-                ][parameter]
+                parameter_model = parent.parameter_models[ensemble_id][parameter]
                 data[parent.ensembles[ensemble_id]._name] = parameter_model.data_df()
                 colors[parent.ensembles[ensemble_id]._name] = color["color"]
 
-                if parameter_model.priors:
+                if parameter_model.priors and "prior" in hist_check_values:
                     priors[parent.ensembles[ensemble_id]._name] = parameter_model.priors
-                    print( parameter_model.priors.function)
-                    print( parameter_model.priors.function_parameter_names)
-                    print( parameter_model.priors.function_parameter_values)
+                    print(parameter_model.priors.function)
+                    print(parameter_model.priors.function_parameter_names)
+                    print(parameter_model.priors.function_parameter_values)
 
         parent.parameter_plot = MultiHistogramPlotModel(
             data,
             colors=colors,
             hist="hist" in hist_check_values,
             kde="kde" in hist_check_values,
-            priors=priors
+            priors=priors,
         )
 
         return parent.parameter_plot.repr
@@ -125,17 +123,14 @@ def multi_parameter_controller(parent, app):
         ],
         [
             State(parent.uuid("hist-check"), "options"),
-            State(parent.uuid("ensemble-selection-store"), "data")
+            State(parent.uuid("ensemble-selection-store"), "data"),
         ],
-        
     )
     def _set_parameter_from_btn(parameter, plotting_options, selected_ensembles):
         has_priors = False
         for ensemble_id, color in selected_ensembles.items():
             if parameter in parent.parameter_models[ensemble_id]:
-                parameter_model = parent.parameter_models[
-                    ensemble_id
-                ][parameter]
+                parameter_model = parent.parameter_models[ensemble_id][parameter]
                 if parameter_model.priors:
                     has_priors = True
                     break

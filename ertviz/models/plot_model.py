@@ -1,7 +1,48 @@
 import math
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
-from scipy.stats import uniform, norm, lognorm
+
+"""
+NORMAL
+LOGNORMAL
+TRUNCATED_NORMAL
+UNIFORM
+LOGUNIF
+CONST
+DUNIF
+ERRF
+DERRF
+TRIANGULAR
+"""
+
+from scipy.stats import norm, lognorm, truncnorm, uniform, loguniform, triang
+
+
+def _TRIANGULAR(xaxis, loc, c, scale):
+    return triang.pdf(xaxis, c, loc, scale)
+
+
+def _TRUNC_NORMAL(xaxis, loc, scale, _min, _max):
+    a, b = (_min - loc) / scale, (_max - loc) / scale
+    return truncnorm.pdf(xaxis, a, b, loc, scale)
+
+
+PRIOR_FUNCTIONS = {
+    "NORMAL": norm.pdf,
+    "LOGNORMAL": lognorm.pdf,
+    "TRUNCATED_NORMAL": _TRUNC_NORMAL,
+    "UNIFORM": uniform.pdf,
+    "LOGUNIF": loguniform.pdf,
+    "TRIANGULAR": _TRIANGULAR,
+}
+
+
+def _create_prior_plot(prior, _min, _max):
+    diff = (_max - _min) / 100
+    xaxis = [_min + i * diff for i in range(100)]
+    yaxis = PRIOR_FUNCTIONS[prior.function](xaxis, *prior.function_parameter_values)
+    return go.Scatter(x=xaxis, y=yaxis)
+
 
 class BoxPlotModel:
     def __init__(self, **kwargs):
@@ -105,20 +146,6 @@ class ResponsePlotModel:
     @property
     def plot_ids(self):
         return {idx: rel.name for idx, rel in enumerate(self._realization_plots)}
-
-
-PRIOR_FUNCTIONS = {
-    "NORMAL" : norm,
-    "UNIFORM" : uniform
-}
-
-def _create_prior_plot(prior, _min, _max):
-    diff = (_max-_min)/100
-    xaxis = [_min + i * diff for i in range(100)]
-
-    yaxis = PRIOR_FUNCTIONS[prior.function].pdf(xaxis, *prior.function_parameter_values)
-    return go.Scatter(x=xaxis, y=yaxis)
-
 
 
 class MultiHistogramPlotModel:
