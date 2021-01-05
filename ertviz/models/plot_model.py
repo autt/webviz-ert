@@ -18,7 +18,10 @@ TRIANGULAR
 from scipy.stats import norm, lognorm, truncnorm, uniform, loguniform, triang
 
 
-def _TRIANGULAR(xaxis, loc, c, scale):
+def _TRIANGULAR(xaxis, xmin, xmode, xmax):
+    loc = xmin
+    c = (xmode - xmin) / (xmax - xmin)
+    scale = xmax
     return triang.pdf(xaxis, c, loc, scale)
 
 
@@ -26,6 +29,8 @@ def _TRUNC_NORMAL(xaxis, loc, scale, _min, _max):
     a, b = (_min - loc) / scale, (_max - loc) / scale
     return truncnorm.pdf(xaxis, a, b, loc, scale)
 
+def _CONST(xaxis, value):
+    return [value for x in xaxis]
 
 PRIOR_FUNCTIONS = {
     "NORMAL": norm.pdf,
@@ -34,6 +39,7 @@ PRIOR_FUNCTIONS = {
     "UNIFORM": uniform.pdf,
     "LOGUNIF": loguniform.pdf,
     "TRIANGULAR": _TRIANGULAR,
+    "CONST" : _CONST
 }
 
 
