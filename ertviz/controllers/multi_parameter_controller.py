@@ -55,10 +55,11 @@ def multi_parameter_controller(parent, app):
         [
             Input(parent.uuid("parameter-selector"), "value"),
             Input(parent.uuid("hist-check"), "value"),
+            Input(parent.uuid("hist-bincount"), "value"),
         ],
         [State(parent.uuid("ensemble-selection-store"), "data")],
     )
-    def _update_histogram(parameter, hist_check_values, selected_ensembles):
+    def _update_histogram(parameter, hist_check_values, bin_count, selected_ensembles):
         if not selected_ensembles:
             raise PreventUpdate
         data = {}
@@ -75,6 +76,7 @@ def multi_parameter_controller(parent, app):
             colors=colors,
             hist="hist" in hist_check_values,
             kde="kde" in hist_check_values,
+            bin_count=bin_count,
         )
         return parent.parameter_plot.repr
 

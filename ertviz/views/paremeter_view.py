@@ -47,6 +47,12 @@ def parameter_view(parent):
                             ],
                             value=["hist", "kde"],
                         ),
+                        html.Label("#Bins:"),
+                        dcc.Input(
+                            id=parent.uuid("hist-bincount"),
+                            type="number",
+                            placeholder="",
+                        ),
                     ],
                     className="ert-graph-options",
                 ),

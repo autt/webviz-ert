@@ -108,12 +108,13 @@ class ResponsePlotModel:
 
 
 class MultiHistogramPlotModel:
-    def __init__(self, data_df_dict, colors, hist=True, kde=True):
+    def __init__(self, data_df_dict, colors, hist=True, kde=True, bin_count=None):
         self._hist_enabled = hist
         self._kde_enabled = kde
         self._data_df_dict = data_df_dict
         self.selection = []
         self._colors = colors
+        self._bin_count = bin_count
 
     @property
     def data_df(self):
@@ -138,8 +139,9 @@ class MultiHistogramPlotModel:
             data.append(list(self._data_df_dict[response_name].values.flatten()))
             colors.append(self._colors[response_name])
             names.append(response_name)
-
-        bin_count = int(math.ceil(math.sqrt(len(data[0]))))
+        bin_count = self._bin_count
+        if bin_count is None:
+            bin_count = int(math.ceil(math.sqrt(len(data[0])))) - 1
         _max = max(map(max, data))
         _min = min(map(min, data))
         bin_size = float((_max - _min) / bin_count)
