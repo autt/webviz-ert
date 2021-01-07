@@ -32,11 +32,16 @@ def _TRUNC_NORMAL(xaxis, loc, scale, _min, _max):
 def _CONST(xaxis, value):
     return [value for x in xaxis]
 
+def _UNIFORM(xaxis, _min, _max):
+    loc = _min
+    scale = _max - _min
+    return uniform.pdf(xaxis, loc, scale)
+
 PRIOR_FUNCTIONS = {
     "NORMAL": norm.pdf,
     "LOGNORMAL": lognorm.pdf,
     "TRUNCATED_NORMAL": _TRUNC_NORMAL,
-    "UNIFORM": uniform.pdf,
+    "UNIFORM": _UNIFORM,
     "LOGUNIF": loguniform.pdf,
     "TRIANGULAR": _TRIANGULAR,
     "CONST" : _CONST
